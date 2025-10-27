@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-dy
+  labels:
+    app: nginx-dy
+spec:
+  selector:
+    matchLabels:
+      app: nginx-dy
+  replicas: 2
+  revisionHistoryLimit: 3
+  template:
+    metadata:
+      labels:
+        app: nginx-dy
+    spec:
+      containers:
+      - name: nginx-dy
+        image: nginx:1.29
+        env:
+          - name: NGINX_HOST
+            value: learning-k8s.org
+          - name: NGINX_PORT
+            value: "80"
+          - name: MY_VAR
+            value: my_value
+        ports:
+        - containerPort: 80
