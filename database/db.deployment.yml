@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dbmovie
+  labels:
+    app: dbmovie
+spec:
+  selector:
+    matchLabels:
+      app: dbmovie
+  template:
+    metadata:
+      labels:
+        app: dbmovie
+    spec:
+      containers:
+      - name: dbmovie
+        image: postgres:18
+        env:
+          - name: POSTGRES_PASSWORD
+            value: mysuperpassword
+          - name: POSTGRES_USER
+            value: movie
+          - name: POSTGRES_DB
+            value: dbmovie
+        ports:
+        - containerPort: 5432

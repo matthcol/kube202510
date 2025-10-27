@@ -48,6 +48,7 @@ kubectl get pod/nginx-solo -o wide
 kubectl get pod/nginx-solo -o json
 kubectl get pod/nginx-solo -o jsonpath="{.spec..image}"
 kubectl get po -l app=nginx-dy -o jsonpath='{range .items[*]}{.metadata.name}{"\t"}{.spec.containers[0].image}{"\n"}{end}'
+kubectl get deploy -l app=nginx-dy -o yaml 
 ```
 
 Superviser et interagir avec un pod:
@@ -74,9 +75,30 @@ TODO: kubectl run test-curl -it --rm --image=curlimages/curl -- curl 10.244.0.19
 kubectl get po --show-labels
 kubectl get po,deploy,rs -l app=nginx-dy
 
+On peut labeliser via le fichier Yaml ou en CLI:
+kubectl label pod/nginx-solo topic=vin
+kubectl label po,rs,deploy -l app=hello-minikube1 topic=world
+kubectl label po,rs,deploy -l app=hello-minikube1 topic=vin dept=47         # plusieurs labels
+kubectl label po,rs,deploy -l app=hello-minikube1 --overwrite topic=france  # change value of a label
+ kubectl label po,rs,deploy -l app=hello-minikube1 topic-                   # delete label
+
+## Update
+
 Rolling update (CLI ou modify Yaml config):
 ```
 kubectl set image deploy nginx-dy nginx-dy=nginx:1.28
 kubectl get po -l app=nginx-dy -o jsonpath='{range .items[*]}{.metadata.name}{"\t"}{.spec.containers[0].image}{"\n"}{end}'
 kubectl rollout status deploy nginx-dy 
+```
+
+## PostgreSQL database
+Déploiement avec fichier Yaml:
+```
+kubectl -f db.deployment.yml
+kubectl get po,rs,deploy -l app=dbmovie
+kubectl exec -it dbmovie-56b8ddb895-xr9b2 -- psql -U postgres -d postgres
+kubectl exec -it dbmovie-56b8ddb895-xr9b2 -- psql -U movie -d dbmovie
+    \l
+    \d
+    \du
 ```
