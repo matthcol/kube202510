@@ -102,3 +102,18 @@ kubectl exec -it dbmovie-56b8ddb895-xr9b2 -- psql -U movie -d dbmovie
     \d
     \du
 ```
+
+NB: pour interragir avec un pod en mode semi-automatique (adapter la syntaxe au CLI):
+```
+$POD=$(kubectl get po -l app=dbmovie -o jsonpath='{.items[0].metadata.name}') 
+kubectl logs $POD
+kubectl exec -it $POD -- psql -U movie -d dbmovie
+```
+
+### Config Map
+kubectl create configmap database-env --from-literal DB_NAME=dbmovie --from-literal DB_USER=movie
+kubectl get cm database-env -o jsonpath='{.data}'
+kubectl delete cm database-env
+
+kubectl create cm database-env --from-env-file .db-env
+kubectl get cm database-env -o jsonpath='{.data}'

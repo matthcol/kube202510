@@ -20,14 +20,8 @@ spec:
           - name: POSTGRES_PASSWORD
             value: mysuperpassword
           - name: POSTGRES_USER
-            valueFrom:
-              configMapKeyRef:
-                name: database-env
-                key: DB_USER
+            value: movie
           - name: POSTGRES_DB
-            valueFrom:
-              configMapKeyRef:
-                name: database-env
-                key: DB_NAME
+            value: dbmovie
         ports:
         - containerPort: 5432

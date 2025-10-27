@@ -1,0 +1,79 @@
+apiVersion: v1
+items:
+- apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    annotations:
+      deployment.kubernetes.io/revision: "7"
+      kubectl.kubernetes.io/last-applied-configuration: |
+        {"apiVersion":"apps/v1","kind":"Deployment","metadata":{"annotations":{},"labels":{"app":"nginx-dy"},"name":"nginx-dy","namespace":"default"},"spec":{"replicas":2,"revisionHistoryLimit":3,"selector":{"matchLabels":{"app":"nginx-dy"}},"template":{"metadata":{"labels":{"app":"nginx-dy"}},"spec":{"containers":[{"env":[{"name":"NGINX_HOST","value":"learning-k8s.org"},{"name":"NGINX_PORT","value":"80"},{"name":"MY_VAR","value":"my_value"}],"image":"nginx:1.29","name":"nginx-dy","ports":[{"containerPort":80}]}]}}}}
+    creationTimestamp: "2025-10-27T10:57:19Z"
+    generation: 14
+    labels:
+      app: nginx-dy
+    name: nginx-dy
+    namespace: default
+    resourceVersion: "17789"
+    uid: a2a12ec0-dfab-4f5b-b141-3113d541f3b1
+  spec:
+    progressDeadlineSeconds: 600
+    replicas: 3
+    revisionHistoryLimit: 3
+    selector:
+      matchLabels:
+        app: nginx-dy
+    strategy:
+      rollingUpdate:
+        maxSurge: 25%
+        maxUnavailable: 25%
+      type: RollingUpdate
+    template:
+      metadata:
+        creationTimestamp: null
+        labels:
+          app: nginx-dy
+      spec:
+        containers:
+        - env:
+          - name: NGINX_HOST
+            value: learning-k8s.org
+          - name: NGINX_PORT
+            value: "80"
+          - name: MY_VAR
+            value: my_value
+          image: nginx:1.29
+          imagePullPolicy: IfNotPresent
+          name: nginx-dy
+          ports:
+          - containerPort: 80
+            protocol: TCP
+          resources: {}
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext: {}
+        terminationGracePeriodSeconds: 30
+  status:
+    availableReplicas: 3
+    conditions:
+    - lastTransitionTime: "2025-10-27T13:03:31Z"
+      lastUpdateTime: "2025-10-27T13:03:31Z"
+      message: Deployment has minimum availability.
+      reason: MinimumReplicasAvailable
+      status: "True"
+      type: Available
+    - lastTransitionTime: "2025-10-27T10:57:19Z"
+      lastUpdateTime: "2025-10-27T13:16:20Z"
+      message: ReplicaSet "nginx-dy-5b6494989b" has successfully progressed.
+      reason: NewReplicaSetAvailable
+      status: "True"
+      type: Progressing
+    observedGeneration: 14
+    readyReplicas: 3
+    replicas: 3
+    updatedReplicas: 3
+kind: List
+metadata:
+  resourceVersion: ""

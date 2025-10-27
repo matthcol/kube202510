@@ -4,6 +4,7 @@ metadata:
   name: nginx-dy
   labels:
     app: nginx-dy
+    topic: vin
 spec:
   selector:
     matchLabels:
@@ -14,6 +15,7 @@ spec:
     metadata:
       labels:
         app: nginx-dy
+        topic: vin
     spec:
       containers:
       - name: nginx-dy
