@@ -73,3 +73,10 @@ TODO: kubectl run test-curl -it --rm --image=curlimages/curl -- curl 10.244.0.19
 ## Labels
 kubectl get po --show-labels
 kubectl get po,deploy,rs -l app=nginx-dy
+
+Rolling update (CLI ou modify Yaml config):
+```
+kubectl set image deploy nginx-dy nginx-dy=nginx:1.28
+kubectl get po -l app=nginx-dy -o jsonpath='{range .items[*]}{.metadata.name}{"\t"}{.spec.containers[0].image}{"\n"}{end}'
+kubectl rollout status deploy nginx-dy 
+```
