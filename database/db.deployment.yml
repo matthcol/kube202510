@@ -29,5 +29,12 @@ spec:
               configMapKeyRef:
                 name: database-env
                 key: DB_NAME
+        volumeMounts:
+          - mountPath: /docker-entrypoint-initdb.d
+            name: ddl-init
         ports:
         - containerPort: 5432
+      volumes:
+        - name: ddl-init
+          configMap:
+            name: ddl-init
