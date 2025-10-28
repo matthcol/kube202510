@@ -1,12 +1,15 @@
 $API_PORT=8090
 $DB_NAME="moviedb"
 $DB_USER="moviemanager"
+$POD_DB_BASENAME="dbmovie"
+
+$POD_DB=$(kubectl get po -l app=${POD_DB_BASENAME} -o jsonpath='{.items[0].metadata.name}')
 
 Write-Output "`n`n******* K8S components *******"
 kubectl get pvc,cm,secret,po,rs,deploy,svc
 
 Write-Output "`n`n******* Query the database *******"
-$POD_DB=$(kubectl get po -l app=dbmovie -o jsonpath='{.items[0].metadata.name}')
+
 kubectl exec -it $POD_DB -- psql -U $DB_USER -d $DB_NAME -c "SELECT COUNT(*) as nb_person FROM person"
 kubectl exec -it $POD_DB -- psql -U $DB_USER -d $DB_NAME -c "SELECT * FROM person LIMIT 10"
 kubectl exec -it $POD_DB -- psql -U $DB_USER -d $DB_NAME -c "SELECT COUNT(*) as nb_movie FROM movie"

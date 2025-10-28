@@ -1,0 +1,21 @@
+apiVersion: v1
+data:
+  01-tables.sql: "\r\ncreate table person (\r\n\tid serial constraint pk_stars primary
+    key,\r\n\tname varchar(150) not null,\r\n\tbirthdate date null\r\n);\r\n\r\ncreate
+    table movie (\r\n\tid serial constraint pk_movie primary key,\r\n\ttitle varchar(300)
+    not null,\r\n\tyear smallint not null,\r\n\tduration smallint null,\r\n\tsynopsis
+    text null,\r\n\tposter_uri varchar(300) null,\r\n\tcolor varchar(20) null,\r\n\tpg
+    varchar(15) null,\r\n\tdirector_id int null,\r\n\tconstraint uniq_movie UNIQUE(title,
+    year),\r\n\tconstraint chk_movie_year CHECK(year >= 1850)\r\n);\r\n\r\ncreate
+    table play(\r\n\tmovie_id int not null,\r\n\tactor_id int not null,\r\n\trole
+    varchar(100),\r\n\tconstraint pk_play primary key(movie_id, actor_id)\r\n);\r\n\r\ncreate
+    table have_genre(\r\n\tmovie_id int not null,\r\n\tgenre varchar(20) not null\r\n);\r\n\r\nalter
+    table movie add constraint fk_movie_director \r\n\tFOREIGN KEY (director_id)\r\n\treferences
+    person(id);\r\nalter table play add constraint FK_PLAY_MOVIE \r\n\tFOREIGN KEY
+    (movie_id)\r\n\treferences movie(id);\r\nalter table play add constraint FK_PLAY_ACTOR
+    \r\n\tFOREIGN KEY (actor_id)\r\n\treferences person(id);\r\nalter table have_genre
+    add constraint FK_HAVE_GENRE \r\n\tFOREIGN KEY (movie_id)\r\n\treferences movie(id);\r\n\r\n\r\n"
+kind: ConfigMap
+metadata:
+  creationTimestamp: null
+  name: ddl-init

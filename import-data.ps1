@@ -1,6 +1,8 @@
 $DB_NAME="moviedb"
 $DB_USER="moviemanager"
-$POD_DB=$(kubectl get po -l app=dbmovie -o jsonpath='{.items[0].metadata.name}')
+$POD_DB_BASENAME="dbmovie"
+
+$POD_DB=$(kubectl get po -l app=${POD_DB_BASENAME} -o jsonpath='{.items[0].metadata.name}')
 
 foreach ($file in Get-ChildItem -Path ./database/sql -Filter "*.sql" | Where-Object { $_.Name -match '^0[2-6].*\.sql$' }) {
     Write-Output "Copy file in pod ${POD_DB}: ./database/sql/$($file.Name)"
