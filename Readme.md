@@ -297,3 +297,5 @@ kubectl get cm   # automatically in the good namespace
 ## Image custom
 cd .\api\api-v1.0\
 docker build -t movieapi:1.0 .
+
+Exemple de DB_URL pour l'api movieapi: postgresql+psycopg2://scott:tiger@localhost:5432/mydatabase
