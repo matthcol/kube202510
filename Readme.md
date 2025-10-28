@@ -193,6 +193,8 @@ Diiferent types de PVC
 | ReadWriteMany | RWX | Lecture-écriture, plusieurs nœuds |
 | ReadWriteOncePod | RWOP | Lecture-écriture, un seul pod |
 
+kubectl get storageclass
+
 kubectl apply -f db.pvc.yml
 kubectl apply -f db.deployment.yml
 kubectl get po,pvc -l app=dbmovie       # POD has been replaced
@@ -211,9 +213,87 @@ kubectl logs $POD
 kubectl exec -it $POD -- psql -U $DB_USER -d $DB_NAME -c "SELECT COUNT(*) FROM person"
 
 ### Secrets
+
+**8 types natifs** :
+1. `Opaque`
+2. `kubernetes.io/service-account-token`
+3. `kubernetes.io/dockercfg`
+4. `kubernetes.io/dockerconfigjson`
+5. `kubernetes.io/basic-auth`
+6. `kubernetes.io/ssh-auth`
+7. `kubernetes.io/tls`
+8. `bootstrap.kubernetes.io/token`
+
+**+ Types personnalisés illimités**
+Exemple: HashiCorp Vault
+
+Exemple avec 1 secret generic de type opaque:
+```
 kubectl create secret generic db-secret '--from-literal=DB_PASSWORD=qqMjdkq#!@%34' 
 kubectl get secret/db-secret -o json
 
 kubectl get po -l app=dbmovie -o wide    # => IP
 $POD=$(kubectl get po -l app=dbmovie -o jsonpath='{.items[0].metadata.name}')
 kubectl exec -it $POD -- psql -U $DB_USER -d $DB_NAME -h 10.244.0.67
+```
+
+## Services
+Services gérés par k8s:
+- ClusterIp : communication interne entre conteneurs (défaut)
+- NodePort : accès direct sur le noeud depuis l'extérieur (standalone)
+- LoadBalancer : accès exterieur avec un replicaset (n > 1)
+- ExternalName: accès par DNS
+
+Autres types de service:
+- Ingress
+
+
+kubectl expose pod hello-minikube1-68d8f56889-5t9xg --type=NodePort --port 8080 --name hello-service
+kubectl expose pod hello-minikube1-68d8f56889-5t9xg --type=NodePort --port 8081 --target-port 8080 --name hello-service
+
+minikube ssh 
+    curl 10.98.2.186:8081
+
+kubectl port-forward service/hello-service 8081:8081
+
+
+kubectl scale deploy hello-minikube1 --replicas=3
+kubectl get po,svc -l app=hello-minikube1 -o wide 
+
+minikube addons enable ingress
+
+## Namespaces
+
+Tous les namespaces: -A
+kubectl get po -A
+
+Préciser un namespace: -n
+kubectl get po -n kube-system
+
+kubectl create namespace moviens
+kubectl get ns  
+
+### Methode1 explicite
+Utiliser -n dans chaque commande ou clé namespace dans le yaml:
+kubectl create configmap database-env -n moviens --from-literal DB_NAME=dbmovie --from-literal DB_USER=movie
+kubectl get cm -n moviens 
+
+### Methode 2: env variable
+```
+$env:KUBECTL_NAMESPACE = "moviens"
+function kns {
+    kubectl -n $env:KUBECTL_NAMESPACE @args
+}
+```
+### Methode 3: config
+```
+kubectl config set-context --current --namespace moviens
+kubectl config get-contexts 
+
+# use new default ns
+kubectl get cm   # automatically in the good namespace
+```
+
+## Image custom
+cd .\api\api-v1.0\
+docker build -t movieapi:1.0 .
