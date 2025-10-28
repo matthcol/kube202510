@@ -18,7 +18,10 @@ spec:
         image: postgres:18
         env:
           - name: POSTGRES_PASSWORD
-            value: mysuperpassword
+            valueFrom:
+              secretKeyRef:
+                name: db-secret
+                key: DB_PASSWORD
           - name: POSTGRES_USER
             valueFrom:
               configMapKeyRef:

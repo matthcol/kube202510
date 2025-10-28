@@ -20,6 +20,14 @@ CLI management of kubernetes
 kubectl version
 ```
 
+Manage context (cluster): can be stored in ~/.kube/config
+```
+kubectl config current-context      
+kubectl config get-contexts
+kubectl config use-context <name_of_context>
+kubectl config view
+```
+
 ## Pods
 1 pod = 1 container
 
@@ -160,3 +168,52 @@ kubectl logs $POD
 kubectl exec -it $POD -- psql -U moviemanager -d moviedb
     \d   # bien voir toutes les tables
 ```
+
+### Data Persistence
+```
+. .\.db-env.ps1
+$POD=$(kubectl get po -l app=dbmovie -o jsonpath='{.items[0].metadata.name}')
+kubectl cp .\sql\02-data-persons.sql ${POD}:/tmp
+kubectl exec -it $POD -- ls -l /tmp
+kubectl exec -it $POD -- psql -U $DB_USER -d $DB_NAME -f /tmp/02-data-persons.sql
+kubectl exec -it $POD -- psql -U $DB_USER -d $DB_NAME -c "SELECT COUNT(*) FROM person"
+```
+
+kubectl delete pod $POD   # destroyed and recreated automatically
+$POD=$(kubectl get po -l app=dbmovie -o jsonpath='{.items[0].metadata.name}')
+kubectl logs $POD
+kubectl exec -it $POD -- psql -U $DB_USER -d $DB_NAME -c "SELECT COUNT(*) FROM person"
+
+Diiferent types de PVC
+
+| Mode | Abréviation | Description |
+|------|-------------|-------------|
+| ReadWriteOnce | RWO | Lecture-écriture, un nœud |
+| ReadOnlyMany | ROX | Lecture seule, plusieurs nœuds |
+| ReadWriteMany | RWX | Lecture-écriture, plusieurs nœuds |
+| ReadWriteOncePod | RWOP | Lecture-écriture, un seul pod |
+
+kubectl apply -f db.pvc.yml
+kubectl apply -f db.deployment.yml
+kubectl get po,pvc -l app=dbmovie       # POD has been replaced
+$POD=$(kubectl get po -l app=dbmovie -o jsonpath='{.items[0].metadata.name}')
+kubectl logs $POD
+kubectl exec -it $POD -- psql -U $DB_USER -d $DB_NAME -c "SELECT COUNT(*) FROM person"
+kubectl describe pod $POD
+
+kubectl cp .\sql\02-data-persons.sql ${POD}:/tmp
+kubectl exec -it $POD -- psql -U $DB_USER -d $DB_NAME -f /tmp/02-data-persons.sql
+kubectl exec -it $POD -- psql -U $DB_USER -d $DB_NAME -c "SELECT COUNT(*) FROM person"
+
+kubectl delete pod $POD   # destroyed and recreated automatically
+$POD=$(kubectl get po -l app=dbmovie -o jsonpath='{.items[0].metadata.name}')
+kubectl logs $POD
+kubectl exec -it $POD -- psql -U $DB_USER -d $DB_NAME -c "SELECT COUNT(*) FROM person"
+
+### Secrets
+kubectl create secret generic db-secret '--from-literal=DB_PASSWORD=qqMjdkq#!@%34' 
+kubectl get secret/db-secret -o json
+
+kubectl get po -l app=dbmovie -o wide    # => IP
+$POD=$(kubectl get po -l app=dbmovie -o jsonpath='{.items[0].metadata.name}')
+kubectl exec -it $POD -- psql -U $DB_USER -d $DB_NAME -h 10.244.0.67
