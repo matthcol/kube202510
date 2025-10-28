@@ -32,9 +32,14 @@ spec:
         volumeMounts:
           - mountPath: /docker-entrypoint-initdb.d
             name: ddl-init
+          - mountPath: /var/lib/postgresql/18/docker
+            name: db-data
         ports:
         - containerPort: 5432
       volumes:
         - name: ddl-init
           configMap:
             name: ddl-init
+        - name: db-data
+          persistentVolumeClaim:
+            claimName: db-pvc
