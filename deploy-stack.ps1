@@ -12,7 +12,9 @@ kubectl create secret generic db-secret '--from-literal=DB_PASSWORD=nottoocompli
 
 kubectl apply -f database/db.pvc.yml
 kubectl apply -f database/db.deployment.yml
+kubectl rollout status deploy dbmovie
 kubectl apply -f database/db.service.yml
 
 kubectl apply -f api/api.deployment.yml
+kubectl rollout status deploy movieapi
 kubectl apply -f api/api.service.yml
