@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends, HTTPException
 
 router = APIRouter()
 
-@router.post("/alive")
+@router.get("/alive")
 def is_alive():
     return {"status": "alive"}
 
