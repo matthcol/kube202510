@@ -298,4 +298,45 @@ kubectl get cm   # automatically in the good namespace
 cd .\api\api-v1.0\
 docker build -t movieapi:1.0 .
 
+## Atelier stack API-DB
 Exemple de DB_URL pour l'api movieapi: postgresql+psycopg2://scott:tiger@localhost:5432/mydatabase
+
+(Re)create all from scratch:
+```
+kubectl delete ns moviens
+./deploy-stack.ps1
+```
+
+Test with scripts:
+```
+./import-data.ps1
+./test-stack.ps1
+```
+
+### Mise à jour API
+
+cd api/api-v2.0
+docker build -t movieapi:2.0 .   # use file Dockerfile
+
+Mise à jour en CLI
+kubectl set image deploy/movieapi movieapi=movieapi:2.0
+kubectl rollout status deploy/movieapi
+kubectl rollout history deploy/movieapi
+
+kubectl get po -l app=movieapi -o jsonpath='{range .items[*]}{.metadata.name}{"\t"}{.spec.containers[0].image}{"\n"}{end}'
+kubectl describe pod movieapi-85dd5bcc46-hzxd9
+
+Annuler la mise à jour:
+kubectl rollout undo deploy/movieapi
+kubectl rollout undo deploy/movieapi --to-revision=2
+
+Tester la disponibilité de l'API
+```
+kubectl run test-curl -it --rm --restart=Never --image=curlimages/curl -- sh
+
+# one query
+curl -s -w "[%{remote_ip}] %{http_code} %{time_total}s\n " -G http://movieapi:8090/movies/
+
+# 1000 queries by 10 workers
+seq 1000 | xargs -n1 -P10 -I{} curl -s -w "[%{remote_ip}] %{http_code} %{time_total}s\n " -G http://movieapi:8090/movies/ -o /dev/null
+```
