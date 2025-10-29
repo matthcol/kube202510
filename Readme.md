@@ -340,3 +340,31 @@ curl -s -w "[%{remote_ip}] %{http_code} %{time_total}s\n " -G http://movieapi:80
 # 1000 queries by 10 workers
 seq 1000 | xargs -n1 -P10 -I{} curl -s -w "[%{remote_ip}] %{http_code} %{time_total}s\n " -G http://movieapi:8090/movies/ -o /dev/null
 ```
+
+Canary deployment
+
+```
+ kubectl set image deploy/movieapi movieapi=movieapi:2.0               
+ kubectl rollout pause deploy/movieapi
+ 
+ # test canary pod:
+ curl -s -w "[%{remote_ip}] %{http_code} %{time_total}s\n " -G http://10.244.0.145:8080/persons/ -o 
+/dev/null
+
+ kubectl rollout resume deploy/movieapi  # ou undo
+```
+
+NB: autre possibilité: faire un deploiement canary avec 1 replica et la nouvelle version
+
+Changement de config
+1 - Editer configmap ou secret
+echo newpassword | base64
+kubectl edit secret db-secret
+2 - Changement en base de données
+3 - Rollout restart
+kubectl rollout restart deploy movieapi
+
+## Tolérance aux pannes
+- Un déploiement (avec replica set): reconstruction automatique des pods
+kubectl delete po movieapi-5dbd79b54b-cg6pl # => new pod créé
+kubectl delete po dbmovie-d9c4d5447-nzbtr   # idem

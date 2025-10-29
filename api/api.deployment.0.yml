@@ -14,17 +14,6 @@ spec:
       labels:
         app: movieapi
     spec:
-      initContainers:
-      - name: wait-for-db
-        image: busybox
-        command:
-          - sh
-          - -c
-          - |
-            until nc -z dbmovie 5432; do
-              echo "Waiting for database....";
-              sleep 2;
-            done
       containers:
       - name: movieapi
         image: movieapi:1.0
