@@ -1,21 +1,35 @@
-apiVersion: apps/v1
-kind: Deployment # stateless
+apiVersion: v1
+kind: Service
 metadata:
-  name: dbmovie
-  labels:
-    app: dbmovie
+  name: movieservice
+spec:
+  clusterIP: None # service ClusterIp Headless
+  selector:
+    app: moviedb
+  ports:
+  - port: 5432
+    targetPort: 5432
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: moviedb
 spec:
   selector:
     matchLabels:
-      app: dbmovie
+      app: moviedb
+  serviceName: movieservice
+  replicas: 2
   template:
     metadata:
       labels:
-        app: dbmovie
+        app: moviedb
     spec:
       containers:
-      - name: dbmovie
+      - name: moviedb
         image: postgres:18
+        ports:
+        - containerPort: 5432
         env:
           - name: POSTGRES_PASSWORD
             valueFrom:
@@ -35,27 +49,18 @@ spec:
         volumeMounts:
           - mountPath: /docker-entrypoint-initdb.d
             name: ddl-init
+            readOnly: True
           - mountPath: /var/lib/postgresql/18/docker
             name: db-data
-        ports:
-        - containerPort: 5432
-        livenessProbe: # => restart
-          tcpSocket:
-            port: 5432
-          initialDelaySeconds: 5
-          periodSeconds: 5
-        readinessProbe: # => service
-          exec:
-            command: 
-              - sh 
-              - -c
-              - pg_isready -U "${POSTGRES_USER}" -d "${POSTGRES_DB}"
-          initialDelaySeconds: 5
-          periodSeconds: 5
       volumes:
         - name: ddl-init
           configMap:
             name: ddl-init
-        - name: db-data
-          persistentVolumeClaim:
-            claimName: db-pvc
+  volumeClaimTemplates:
+  - metadata:
+      name: db-data
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 2Gi

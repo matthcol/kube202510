@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: hello-minikube1
+  labels: 
+    app: hello-minikube1
+spec:
+  selector:
+    app: hello-minikube1
+  ports:
+  - port: 8082
+    targetPort: 8080
+  type: NodePort

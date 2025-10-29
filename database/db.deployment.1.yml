@@ -1,5 +1,5 @@
 apiVersion: apps/v1
-kind: Deployment # stateless
+kind: Deployment
 metadata:
   name: dbmovie
   labels:
@@ -39,19 +39,6 @@ spec:
             name: db-data
         ports:
         - containerPort: 5432
-        livenessProbe: # => restart
-          tcpSocket:
-            port: 5432
-          initialDelaySeconds: 5
-          periodSeconds: 5
-        readinessProbe: # => service
-          exec:
-            command: 
-              - sh 
-              - -c
-              - pg_isready -U "${POSTGRES_USER}" -d "${POSTGRES_DB}"
-          initialDelaySeconds: 5
-          periodSeconds: 5
       volumes:
         - name: ddl-init
           configMap:

@@ -1,0 +1,4 @@
+db:
+  image:
+    tag: 18 
+  password: mysuperpasswordacrypter

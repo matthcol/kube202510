@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment # stateless
+metadata:
+  name: dbmovie
+  labels:
+    app: dbmovie
+spec:
+  selector:
+    matchLabels:
+      app: dbmovie
+  template:
+    metadata:
+      labels:
+        app: dbmovie
+    spec:
+      containers:
+      - name: dbmovie
+        image: postgres:{{ .Values.db.image.tag }}
+        env:
+          - name: POSTGRES_PASSWORD
+            value: {{ .Values.db.password }}
+        ports:
+        - containerPort: 5432

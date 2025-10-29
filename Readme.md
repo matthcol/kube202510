@@ -365,6 +365,63 @@ kubectl edit secret db-secret
 kubectl rollout restart deploy movieapi
 
 ## Tolérance aux pannes
-- Un déploiement (avec replica set): reconstruction automatique des pods
+
+### Restart auto
+Un déploiement (avec replica set): reconstruction automatique des pods:
+```
 kubectl delete po movieapi-5dbd79b54b-cg6pl # => new pod créé
 kubectl delete po dbmovie-d9c4d5447-nzbtr   # idem
+```
+
+### Init Container
+Test dependencies or prepare something before starting container
+
+### Probes
+Customize liveness and readiness of a container
+
+Probe types:
+- httpGet (API, frontend) => OK si status 2xx ou 3xx
+- tcpSocket (DB) => OK si réponse
+- exec (any command) => OK status 0
+
+## StatefulSet
+- Pod à état
+- stabilité des noms
+- service Headless:
+    * nom service
+    * nom pour chaque replica
+
+Install:
+```
+kubectl apply -f .\database\db.statefulset.yml 
+kubectl get all
+kubectl get endpoints movieservice 
+```
+
+Test each pod:
+```
+kubectl run -it --rm --restart=Never test-pg --image=postgres:18 -- bash
+    psql -U moviemanager -d moviedb -h moviedb-0.movieservice.moviens2.svc.cluster.local
+    psql -U moviemanager -d moviedb -h moviedb-1.movieservice.moviens2.svc.cluster.local
+```
+
+Chaque pod à un nom sur le modèle suivant:
+<pod-name>.<headless-service>.<namespace>.svc.cluster.local
+
+## Jobs
+Tâches planifiées
+- one shot: job
+- récurrent: cronjob
+
+Exemples :
+- backup
+- purge ou nettoyage
+
+## Gestionnaire de configuration
+- Helm Charts
+```
+cd stack-helm
+helm install movies . -n moviens3 --create-namespace
+helm list -n moviens3   
+helm uninstall movies -n moviens3  
+```
